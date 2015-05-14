@@ -45,15 +45,16 @@ import java.util.Vector;
 //    (location may be different on Mac/Linux)
 // 3. Run and bask in awesomeness
 
-ToxiclibsSupport gfx;
+//################################ ALVARO IN ######################################
 Writer writer;
-SimpleDateFormat sdf, hms;
+SimpleDateFormat sdf, hms, agora;
 int posicao, janela;
 String[] str_dados;
+String COM = "/dev/ttyACM0";
+double mult = 1;
+//################################ ALVARO OUT ######################################
 
-// get the first available port (use EITHER this OR the specific port code below)
-final String portName = "COM7";
-
+ToxiclibsSupport gfx;
 Serial port;                         // The serial port
 char[] teapotPacket = new char[14];  // InvenSense Teapot packet
 int serialCount = 0;                 // current packet byte position
@@ -76,6 +77,7 @@ void setup() {
     sdf = new SimpleDateFormat("yyyy/MM/dd");
     // hora/minuto/milisegundo
     hms = new SimpleDateFormat("HH:mm:ss:SS");
+    agora = new SimpleDateFormat("HH:mm:ss");
     
     //classe responsavel por salvar dados em disco
     writer = new Writer(this);
@@ -91,6 +93,10 @@ void setup() {
   
     // display serial port list for debugging/clarity
     //println(Serial.list());
+
+    // get the first available port (use EITHER this OR the specific port code below)
+    println(Serial.list());
+    String portName = COM;
     
     // get a specific serial port (use EITHER this OR the first-available code above)
     //String portName = "COM4";
@@ -113,7 +119,13 @@ void draw() {
     
     // black background
     background(0);
-    
+    //################################ ALVARO IN ######################################
+    fill(255);
+    text("" + agora.format(new Date()), 10, 20);
+    text("y: " + mult*ypr[0], 10, 40);
+    text("p: " + mult*ypr[1], 10, 60);
+    text("r: " + mult*ypr[2], 10, 80);
+    //################################ ALVARO OUT ######################################
     // translate everything to the middle of the viewport
     pushMatrix();
     translate(width / 2, height / 2);
@@ -131,9 +143,9 @@ void draw() {
 
     float[] axis = quat.toAxisAngle();
     rotate(axis[0], -axis[1], axis[3], axis[2]);
-
+    
     //################################ ALVARO IN ######################################
-    String  temp = getHMS() + "\ty: " +ypr[0] + "\tp: " + ypr[1] + "\tr: " + ypr[2];
+    String  temp = getHMS() + "\t\ty: " + mult*ypr[0] + "\tp: " + mult*ypr[1] + "\tr: " + mult*ypr[2];
     println(temp);
 
     str_dados[posicao] = temp;
@@ -142,10 +154,12 @@ void draw() {
     if(posicao == janela)
     {
         writer.writeAt(getSDF()+".txt", str_dados);
+        
+
         posicao = 0;  
     }
-    fill(234);
-    text("y: " +ypr[0]+", p: "+ypr[1]+", r: " + ypr[2], 10, 25);
+    
+    
     //################################ ALVARO END ######################################
 
     // draw main body in red
@@ -232,9 +246,9 @@ void serialEvent(Serial port) {
                     
 
                     //QQcalculate yaw/pitch/roll angles
-                    ypr[0] = atan2(2*q[1]*q[2] - 2*q[0]*q[3], 2*q[0]*q[0] + 2*q[1]*q[1] - 1);
-                    ypr[1] = atan(gravity[0] / sqrt(gravity[1]*gravity[1] + gravity[2]*gravity[2]));
-                    ypr[2] = atan(gravity[1] / sqrt(gravity[0]*gravity[0] + gravity[2]*gravity[2]));
+                    ypr[0] = 10*atan2(2*q[1]*q[2] - 2*q[0]*q[3], 2*q[0]*q[0] + 2*q[1]*q[1] - 1);
+                    ypr[1] = 10*atan(gravity[0] / sqrt(gravity[1]*gravity[1] + gravity[2]*gravity[2]));
+                    ypr[2] = 10*atan(gravity[1] / sqrt(gravity[0]*gravity[0] + gravity[2]*gravity[2]));
                     
                     /*
                     // output various components for debugging
