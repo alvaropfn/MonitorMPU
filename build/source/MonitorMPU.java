@@ -1,3 +1,33 @@
+import processing.core.*; 
+import processing.data.*; 
+import processing.event.*; 
+import processing.opengl.*; 
+
+import processing.serial.*; 
+import processing.opengl.*; 
+import toxi.geom.*; 
+import toxi.processing.*; 
+import java.text.SimpleDateFormat; 
+import java.util.Calendar; 
+import java.util.Date; 
+import java.util.Vector; 
+import java.io.File; 
+import java.io.FileWriter; 
+import java.io.BufferedWriter; 
+import java.io.IOException; 
+import java.io.PrintWriter; 
+
+import java.util.HashMap; 
+import java.util.ArrayList; 
+import java.io.File; 
+import java.io.BufferedReader; 
+import java.io.PrintWriter; 
+import java.io.InputStream; 
+import java.io.OutputStream; 
+import java.io.IOException; 
+
+public class MonitorMPU extends PApplet {
+
 // I2C device class (I2Cdev) demonstration Processing sketch for MPU6050 DMP output
 // 6/20/2012 by Jeff Rowberg <jeff@rowberg.net>
 // Updates should (hopefully) always be available at https://github.com/jrowberg/i2cdevlib
@@ -29,14 +59,14 @@ THE SOFTWARE.
 ===============================================
 */
 
-import processing.serial.*;
-import processing.opengl.*;
-import toxi.geom.*;
-import toxi.processing.*;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Vector;
+
+
+
+
+
+
+
+
 
 
 // NOTE: requires ToxicLibs to be installed in order to run properly.
@@ -69,7 +99,7 @@ float[] gravity = new float[3];
 float[] euler = new float[3];
 float[] ypr = new float[3];
 
-void setup() {
+public void setup() {
     // 300px square viewport using OpenGL rendering
     size(300, 300, OPENGL);
     gfx = new ToxiclibsSupport(this);
@@ -110,7 +140,7 @@ void setup() {
     port.write('r');
 }
 
-void draw() {
+public void draw() {
     if (millis() - interval > 1000) {
         // resend single character to trigger DMP init/start
         // in case the MPU is halted/reset while applet is running
@@ -194,7 +224,7 @@ void draw() {
 
 }
 
-void serialEvent(Serial port) {
+public void serialEvent(Serial port) {
     interval = millis();
     while (port.available() > 0) {
         int ch = port.read();
@@ -266,7 +296,7 @@ void serialEvent(Serial port) {
     }
 }
 
-void drawCylinder(float topRadius, float bottomRadius, float tall, int sides) {
+public void drawCylinder(float topRadius, float bottomRadius, float tall, int sides) {
     float angle = 0;
     float angleIncrement = TWO_PI / sides;
     beginShape(QUAD_STRIP);
@@ -311,3 +341,96 @@ public String getSDF()
 
 public String getHMS()
 {return hms.format(new Date());}
+
+
+
+
+
+
+public class Writer {
+    
+    PApplet dad;
+    
+    BufferedWriter out;
+
+    Writer(PApplet dad)
+    {
+        this.dad = dad;
+    }
+
+    public void overWrite(String name, String[] content)
+    {    
+        dad.saveStrings(name, content);
+    }
+
+    public void writeAt(String name, String content)
+    {
+        
+        File f = new File(dad.dataPath(name));
+        if (!f.exists())
+        {
+             createFile(f);
+        }
+        try
+        {
+            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f, true)));
+            out.println(content);
+            out.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    public void writeAt(String name, String[] content)
+    {
+        
+        File f = new File(dad.dataPath(name));
+        if (!f.exists())
+        {
+             createFile(f);
+        }
+        try
+        {
+            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f, true)));
+            for (String s : content)
+            {
+                out.println(s);    
+            }
+            out.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+/**
+ * Creates a new file including all subfolders
+ */
+    private void createFile(File f)
+    {
+        File parentDir = f.getParentFile();
+        try 
+        {
+            parentDir.mkdirs(); 
+            f.createNewFile();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }    
+
+}
+
+    static public void main(String[] passedArgs) {
+        String[] appletArgs = new String[] { "MonitorMPU" };
+        if (passedArgs != null) {
+          PApplet.main(concat(appletArgs, passedArgs));
+        } else {
+          PApplet.main(appletArgs);
+        }
+    }
+}
